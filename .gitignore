@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcarchive
+
+# Build
+build/
+
+# Swift Package Manager
+.build/
+Packages/
+*.resolved
+
+# Credentials — copy SpotifyCredentials.swift.template → SpotifyCredentials.swift
+Twist/Config/SpotifyCredentials.swift
