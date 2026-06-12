@@ -4,8 +4,8 @@ import SwiftUI
 struct ResultView: View {
     let result: ConversionResult
 
-    // Pop all the way back to HomeView
     @EnvironmentObject private var navigationState: NavigationState
+    @State private var showRawOCR = false
 
     var body: some View {
         ScrollView {
@@ -27,32 +27,71 @@ struct ResultView: View {
 
                 // Stats
                 HStack(spacing: 48) {
-                    statView(count: result.matchedCount,           label: "Added")
-                    statView(count: result.skippedTracks.count,    label: "Skipped")
+                    statView(count: result.matchedCount,        label: "Added")
+                    statView(count: result.skippedTracks.count, label: "Skipped")
                 }
                 .padding()
                 .background(Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                // Skipped list
-                if !result.skippedTracks.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Songs not found on Apple Music")
+                // OCR recognized tracks
+                if !result.recognizedTracks.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("OCR認識結果 (\(result.recognizedTracks.count)曲)")
                             .font(.headline)
                             .padding(.bottom, 2)
-
-                        ForEach(result.skippedTracks, id: \.self) { track in
-                            HStack(spacing: 8) {
-                                Image(systemName: "questionmark.circle")
-                                    .foregroundStyle(.orange)
-                                Text(track)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                        ForEach(Array(result.recognizedTracks.enumerated()), id: \.offset) { _, track in
+                            let key     = "\(track.name) – \(track.artist)"
+                            let matched = !result.skippedTracks.contains(key)
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: matched ? "checkmark.circle.fill" : "questionmark.circle")
+                                    .foregroundStyle(matched ? .green : .orange)
+                                    .frame(width: 20)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(track.name).font(.subheadline)
+                                    Text(track.artist).font(.caption).foregroundStyle(.secondary)
+                                }
                             }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+
+                // Raw OCR lines (debug)
+                if !result.rawOCRLines.isEmpty {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Button {
+                            showRawOCR.toggle()
+                        } label: {
+                            HStack {
+                                Text("生 OCRログ (\(result.rawOCRLines.count)行)")
+                                    .font(.headline)
+                                Spacer()
+                                Image(systemName: showRawOCR ? "chevron.up" : "chevron.down")
+                            }
+                            .foregroundStyle(.primary)
+                            .padding()
+                        }
+                        if showRawOCR {
+                            Divider()
+                            VStack(alignment: .leading, spacing: 4) {
+                                ForEach(Array(result.rawOCRLines.enumerated()), id: \.offset) { i, line in
+                                    HStack(alignment: .top, spacing: 6) {
+                                        Text("\(i + 1)")
+                                            .font(.system(.caption2, design: .monospaced))
+                                            .foregroundStyle(.tertiary)
+                                            .frame(width: 24, alignment: .trailing)
+                                        Text(line)
+                                            .font(.system(.caption, design: .monospaced))
+                                    }
+                                }
+                            }
+                            .padding()
+                        }
+                    }
                     .background(Color(.systemGray6))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }

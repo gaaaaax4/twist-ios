@@ -1,32 +1,17 @@
 import Foundation
-import Combine
+import UIKit
 
 @MainActor
 final class HomeViewModel: ObservableObject {
-    @Published var urlText:       String = ""
-    @Published var isConverting:  Bool   = false
+    @Published var selectedImage:   UIImage? = nil
+    @Published var conversionImage: UIImage? = nil
+    @Published var playlistName:    String   = ""
+    @Published var isConverting:    Bool     = false
 
-    private var cancellables = Set<AnyCancellable>()
-
-    init() {
-        // Handle deep links from the OS (twist://convert?url=...)
-        NotificationCenter.default.publisher(for: .conversionRequested)
-            .compactMap { $0.userInfo?["url"] as? String }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] urlString in
-                self?.urlText      = urlString
-                self?.isConverting = true
-            }
-            .store(in: &cancellables)
-    }
-
-    var isValidURL: Bool {
-        let t = urlText.trimmingCharacters(in: .whitespaces)
-        return t.contains("open.spotify.com/playlist/") ||
-               t.hasPrefix("spotify:playlist:")
-    }
+    var isReady: Bool { selectedImage != nil }
 
     func startConversion() {
-        isConverting = true
+        conversionImage = selectedImage
+        isConverting    = true
     }
 }

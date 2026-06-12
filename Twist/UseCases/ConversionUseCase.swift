@@ -1,31 +1,45 @@
 import Foundation
 import MusicKit
+import UIKit
 
 @available(iOS 16.0, *)
 @MainActor
 final class ConversionUseCase {
 
-    private let spotifyService    = SpotifyService()
+    private let ocrService        = OCRService()
+    private let parser            = PlaylistParser()
     private let appleMusicService = AppleMusicService()
 
     /// Called on every track processed: (completedCount, totalCount)
     var onProgress: ((Int, Int) -> Void)?
 
-    func convert(urlString: String) async throws -> ConversionResult {
+    func convert(image: UIImage, playlistName: String) async throws -> ConversionResult {
 
-        // 1. Fetch Spotify playlist
-        print("[Conversion] ▶ start — url: \(urlString)")
-        let playlist = try await spotifyService.fetchPlaylist(fromString: urlString)
-        let tracks   = playlist.tracks.items.compactMap(\.track)
-        let total    = tracks.count
-        print("[Conversion] ✅ playlist: \"\(playlist.name)\", tracks: \(total)")
+        // 1. OCR
+        print("[OCR] ▶ start")
+        let lines = try await ocrService.recognizeText(in: image)
+        print("[OCR] ── raw lines (\(lines.count)) ──────────────────")
+        for (i, line) in lines.enumerated() {
+            print("[OCR]  \(String(format: "%3d", i + 1)): \(line)")
+        }
+        print("[OCR] ────────────────────────────────────────────────")
+
+        let tracks = parser.parse(lines: lines)
+        print("[OCR] ── parsed tracks (\(tracks.count)) ─────────────")
+        for (i, t) in tracks.enumerated() {
+            print("[OCR]  \(String(format: "%3d", i + 1)): \"\(t.name)\" / \"\(t.artist)\"")
+        }
+        print("[OCR] ────────────────────────────────────────────────")
+        guard !tracks.isEmpty else { throw AppError.noTracksRecognized }
+
+        let total = tracks.count
 
         // 2. Request Apple Music authorization
         print("[Conversion] ▶ requesting Apple Music auth")
         try await appleMusicService.requestAuthorization()
         print("[Conversion] ✅ Apple Music authorized")
 
-        // 3. Search sequentially (respects Spotify rate limits)
+        // 3. Search each recognized track
         var matched: [Song]   = []
         var skipped: [String] = []
 
@@ -35,31 +49,30 @@ final class ConversionUseCase {
                     print("[Conversion]   ✅ matched [\(index+1)/\(total)]: \(track.name)")
                     matched.append(song)
                 } else {
-                    print("[Conversion]   ⚠️ skipped [\(index+1)/\(total)]: \(track.name) – \(track.artistName)")
-                    skipped.append("\(track.name) – \(track.artistName)")
+                    print("[Conversion]   ⚠️ skipped [\(index+1)/\(total)]: \(track.name) – \(track.artist)")
+                    skipped.append("\(track.name) – \(track.artist)")
                 }
             } catch {
                 print("[Conversion]   ❌ findSong error [\(index+1)/\(total)]: \(track.name) — \(error)")
-                skipped.append("\(track.name) – \(track.artistName)")
+                skipped.append("\(track.name) – \(track.artist)")
             }
             onProgress?(index + 1, total)
         }
 
         // 4. Create Apple Music playlist
-        print("[Conversion] ▶ creating playlist — matched: \(matched.count), skipped: \(skipped.count)")
-        let ownerName = playlist.owner.displayName ?? "Unknown"
-        try await appleMusicService.createPlaylist(
-            name: playlist.name,
-            ownerName: ownerName,
-            songs: matched
-        )
+        let name = playlistName.trimmingCharacters(in: .whitespaces).isEmpty
+            ? "Converted Playlist" : playlistName
+        print("[Conversion] ▶ creating playlist '‌\(name)' — matched: \(matched.count), skipped: \(skipped.count)")
+        try await appleMusicService.createPlaylist(name: name, songs: matched)
         print("[Conversion] ✅ playlist created")
 
         return ConversionResult(
-            playlistName: playlist.name,
-            totalTracks: total,
-            matchedCount: matched.count,
-            skippedTracks: skipped
+            playlistName:      name,
+            totalTracks:       total,
+            matchedCount:      matched.count,
+            skippedTracks:     skipped,
+            recognizedTracks:  tracks,
+            rawOCRLines:       lines
         )
     }
 }

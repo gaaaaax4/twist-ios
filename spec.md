@@ -4,10 +4,9 @@
 
 ### アプリの目的
 
-Spotify のプレイリストを Apple Music のプレイリストに変換する iOS アプリを制作します。
+Spotify のプレイリストのスクリーンショットを撮影・選択すると、OCR（文字認識）で楽曲名とアーティスト名を自動抽出し、Apple Music のプレイリストに変換する iOS アプリです。
 
-将来的には Apple Music から Spotify など、任意の音楽サブスクリプションサービス間での相互変換にも対応することを目標としています。  
-ただし、まずは **Spotify → Apple Music** の変換を優先して実現します。
+将来的には Apple Music から Spotify など、任意の音楽サブスクリプションサービス間での相互変換にも対応することを目標としています。
 
 ### 開発の背景・原体験
 
@@ -19,39 +18,38 @@ X（旧 Twitter）などで音楽に詳しいユーザーが共有している S
 
 ### アプリ名称
 
-**Twist**（"translate your music" をもじった造語）
-
-> 他により良い名称があれば提案を歓迎します。
+**Twist**
 
 ### 差別化ポイント
 
 類似サービスはすでに存在しますが、本アプリは以下の点で差別化を図ります。
 
-- X などの外部アプリからタップした Spotify プレイリストの URL を本アプリで直接受け取り、Apple Music のプレイリストに変換します。
-- **リンクをタップするだけで本アプリが起動する**（Universal Links / カスタム URL スキームによるディープリンク対応）ことが最大のポイントです。
+- **Spotify アカウント不要**：スクリーンショットを使うため、Spotify のログインや API 連携が一切不要
+- Spotify のプレイリスト画面をスクショするだけで Apple Music に変換できる
+- **シンプルな操作**：画像を選ぶ → タップ → 完了
 
 ### ユーザーフロー
 
-1. ユーザーが Spotify のプレイリストリンクをタップする
-2. 本アプリが起動し、Apple Music へのプレイリスト変換が自動的に開始される
-3. 変換中はプログレスバーと広告エリアを表示する（広告実装は後フェーズ）
-4. 変換完了後、以下の内容で Apple Music にプレイリストが作成される
-   - **プレイリスト名**：Spotify のプレイリスト名をそのまま使用（重複時は `{名前}_2` のようにインクリメント）
-   - **説明文（description）**：元のプレイリスト作成者の名前 + 本アプリ名（Twist）
+1. ユーザーが Spotify アプリでプレイリスト画面をスクリーンショット撮影する
+2. Twist を起動し、スクリーンショットを選択する
+3. OCR が楽曲名・アーティスト名を自動抽出する
+4. Apple Music で曲を検索し、プレイリストを作成する
+5. 変換完了後、以下の内容で Apple Music にプレイリストが作成される
+   - **プレイリスト名**：ユーザーが入力した名前（未入力時は "Converted Playlist"）
+   - **説明文**：本アプリ名（Twist）経由で作成された旨
 
-### ホーム画面（直接起動時）
+### ホーム画面
 
-- **URL 入力フォーム**を表示し、Spotify プレイリスト URL を貼り付けて変換に進める
-- ディープリンク経由での起動時は即変換を開始する
+- **画像ピッカー**を表示し、フォトライブラリからスクリーンショットを選択する
+- **プレイリスト名入力フォーム**（任意）
+- 画像選択後に「変換」ボタンが有効になる
 
 ### 認証方針
 
 | サービス | 認証 | 備考 |
 |---|---|---|
 | Apple Music | **必須**（MusicKit 認証） | プレイリスト作成に必要 |
-| Spotify | **不要** | 公開プレイリストの読み取りのみ |
-
-> 非公開 Spotify プレイリストは対応しない（Spotify OAuth は実装しない）
+| Spotify | **不要** | スクリーンショット OCR で対応 |
 
 ### 曲の検索・マッチング
 
@@ -76,7 +74,7 @@ X（旧 Twitter）などで音楽に詳しいユーザーが共有している S
 
 | 項目 | 値 |
 |---|---|
-| Bundle Identifier | `com.yourname.twist`（暫定） |
+| Bundle Identifier | `com.n2o.twist` |
 | 最小 iOS | iOS 16 |
 | 表示言語 | 英語のみ（平易な単語を使用） |
 | MusicKit Capability | App ID 作成後に有効化 |
@@ -88,7 +86,8 @@ X（旧 Twitter）などで音楽に詳しいユーザーが共有している S
 | UI | SwiftUI |
 | アーキテクチャ | MVVM |
 | Apple Music 連携 | MusicKit（Apple 純正フレームワーク） |
-| Spotify データ取得 | Spotify Web API（Client Credentials フロー） |
+| 画像テキスト認識 | Vision フレームワーク（`VNRecognizeTextRequest`） |
+| 画像選択 | PhotosUI（`PhotosPicker`） |
 | 非同期処理 | Swift Concurrency（async/await） |
 | 最小 iOS | iOS 16 |
 
@@ -99,7 +98,8 @@ X（旧 Twitter）などで音楽に詳しいユーザーが共有している S
 ```
 View（SwiftUI）
   └── ViewModel（@ObservableObject / @Observable）
-        ├── SpotifyService     // Spotify Web API クライアント
+        ├── OCRService         // Vision フレームワーク OCR
+        ├── PlaylistParser     // OCR テキスト → トラックリスト変換
         ├── AppleMusicService  // MusicKit ラッパー
         └── ConversionUseCase  // 変換ロジックの統合
 ```
@@ -109,63 +109,45 @@ View（SwiftUI）
 ### 画面構成・遷移
 
 ```
-HomeView（URL 入力フォーム）
+HomeView（画像選択 + プレイリスト名入力）
   └── ConversionView（変換中：プログレスバー + 広告エリア）
         └── ResultView（変換完了：件数・スキップ曲一覧）
 ```
 
 | 画面 | 役割 |
 |---|---|
-| `HomeView` | URL 入力フォームを表示。貼り付け後に「変換」ボタンで遷移 |
-| `ConversionView` | 変換進捗をプログレスバーで表示。広告エリアを予約（初期は空） |
+| `HomeView` | 画像ピッカーとプレイリスト名入力を表示。画像選択後に「変換」ボタンで遷移 |
+| `ConversionView` | OCR処理 → Apple Music 検索の進捗をプログレスバーで表示 |
 | `ResultView` | 成功数・スキップ曲数と曲名一覧を表示 |
 
-> ディープリンク経由での起動時は `HomeView` をスキップし、直接 `ConversionView` に遷移する
-
 ---
 
-### ディープリンク対応
+### OCR（Vision フレームワーク）連携
 
-- **方式**：カスタム URL スキーム（`twist://`）を初期実装とし、将来的に Universal Links へ移行
-- iOS の「開く」アプリからのリンクタップ時、`twist://convert?url={encoded_spotify_url}` としてアプリを起動する
-- `AppDelegate` / `SceneDelegate` または SwiftUI の `.onOpenURL` モディファイアで URL を受け取る
+#### テキスト認識
 
-> **将来対応**：Universal Links（`https://twist.app/convert?url=...`）に移行する場合、サーバーに `apple-app-site-association` ファイルの設置が必要
-
----
-
-### Spotify Web API 連携
-
-#### 認証（Client Credentials フロー）
-
-- Spotify Developer Dashboard でアプリ登録し、`client_id` / `client_secret` を取得
-- アクセストークンの取得：
-
-```
-POST https://accounts.spotify.com/api/token
-Authorization: Basic base64({client_id}:{client_secret})
-Body: grant_type=client_credentials
+```swift
+let request = VNRecognizeTextRequest { request, error in ... }
+request.recognitionLevel = .accurate
+request.usesLanguageCorrection = false
+let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+try handler.perform([request])
 ```
 
-- 取得したトークンは `UserDefaults` または在メモリキャッシュで管理し、有効期限（3600 秒）で自動更新する
+#### Spotify スクリーンショットのパース
 
-> **注意**：MVP では `client_secret` をアプリに埋め込むが、将来的にはサーバーサイドのトークン発行エンドポイントに切り出すことを推奨
-
-#### プレイリスト情報の取得
+Spotify リスト表示の典型的な行構造：
 
 ```
-GET https://api.spotify.com/v1/playlists/{playlist_id}
-Authorization: Bearer {access_token}
+楽曲名
+アーティスト名 · アルバム名
+再生時間
 ```
 
-- 対応する Spotify URL フォーマット（どちらも受け付ける）：
-  - `https://open.spotify.com/playlist/{playlist_id}`
-  - `spotify:playlist:{playlist_id}`
-- `playlist_id` の抽出：
-  - https 形式 → URL パスの末尾コンポーネントを使用（クエリパラメータは除去）
-  - URI 形式 → `:` で分割した 3 番目の要素を使用
-- 取得するフィールド：`name`、`description`、`owner.display_name`、`tracks.items[].track`（`name`、`artists`、`album.name`）
-- トラック数が 100 件を超える場合は `tracks.next` を再帰的に取得（ページネーション対応）
+パース戦略：
+- `·`（中点）を含む行を「アーティスト行」と判定
+- その直前行を「楽曲名」として取得
+- 数字のみ・時間形式（`3:45`）・メタデータ行（"songs", "min" 等）はスキップ
 
 ---
 
@@ -187,14 +169,14 @@ req.limit = 1
 let res = try await req.response()
 ```
 
-- マッチ戦略：`曲名 + アーティスト名` で検索 → ヒットしない場合 `曲名 + アルバム名` で再試行 → それでもヒットしない場合はスキップ
+- マッチ戦略：`曲名 + アーティスト名` で検索 → ヒットしない場合 `曲名` のみで再試行 → それでもヒットしない場合はスキップ
 
 #### プレイリストの作成
 
 ```swift
 try await MusicLibrary.shared.createPlaylist(
     name: playlistName,
-    description: "Created by {owner} via Twist",
+    description: "Created via Twist",
     items: matchedSongs
 )
 ```
@@ -209,15 +191,16 @@ try await MusicLibrary.shared.createPlaylist(
 ### 変換フロー詳細
 
 ```
-1. Spotify URL のバリデーション（playlist URL かチェック）
-2. Spotify API でプレイリスト情報・トラック一覧を取得
-3. MusicKit のユーザー認証（未認証の場合）
-4. 各トラックを Apple Music のカタログで検索（**逐次**：レート制限対策のため）
+1. ユーザーがスクリーンショット画像を選択
+2. Vision OCR で楽曲名・アーティスト名を抽出
+3. 認識されたトラック数が 0 の場合はエラー表示
+4. MusicKit のユーザー認証（未認証の場合）
+5. 各トラックを Apple Music のカタログで検索（逐次）
    ├── ヒット → 変換リストに追加
    └── ミス  → スキップリストに追加
-5. 既存プレイリスト名チェック → 重複時はインクリメントした名前を使用
-6. Apple Music にプレイリストを作成
-7. ResultView に遷移（成功数・スキップ曲一覧を表示）
+6. 既存プレイリスト名チェック → 重複時はインクリメントした名前を使用
+7. Apple Music にプレイリストを作成
+8. ResultView に遷移（成功数・スキップ曲一覧を表示）
 ```
 
 - プログレスバーの進捗値：`完了曲数 / 総曲数`
@@ -227,15 +210,11 @@ try await MusicLibrary.shared.createPlaylist(
 ### エラーハンドリング
 
 - エラーメッセージは**シンプルな英文 + エラーコード**の形式で表示する
-- 表示例：`Something went wrong. (ERR_SPOTIFY_401)`
 
 | エラーコード | 状況 |
 |---|---|
-| `ERR_INVALID_URL` | 入力 URL が Spotify プレイリスト形式でない |
-| `ERR_SPOTIFY_401` | Spotify API トークン取得失敗 |
-| `ERR_SPOTIFY_404` | プレイリストが見つからない |
-| `ERR_SPOTIFY_429` | Spotify API レート制限超過 |
-| `ERR_SPOTIFY_NET` | Spotify API ネットワークエラー |
+| `ERR_OCR_FAILED` | 画像からのテキスト認識に失敗 |
+| `ERR_NO_TRACKS` | OCR は成功したが楽曲が1件も認識されなかった |
 | `ERR_MUSIC_AUTH` | Apple Music の認証が拒否された |
 | `ERR_MUSIC_CREATE` | Apple Music プレイリスト作成失敗 |
 | `ERR_MUSIC_NET` | Apple Music API ネットワークエラー |
@@ -247,8 +226,7 @@ try await MusicLibrary.shared.createPlaylist(
 ```
 Twist/
 ├── App/
-│   ├── TwistApp.swift       // エントリポイント・URL ハンドリング
-│   └── ContentView.swift
+│   └── TwistApp.swift
 ├── Features/
 │   ├── Home/
 │   │   ├── HomeView.swift
@@ -257,16 +235,15 @@ Twist/
 │   │   ├── ConversionView.swift
 │   │   └── ConversionViewModel.swift
 │   └── Result/
-│       ├── ResultView.swift
-│       └── ResultViewModel.swift
+│       └── ResultView.swift
 ├── Services/
-│   ├── SpotifyService.swift   // Spotify Web API クライアント
+│   ├── OCRService.swift        // Vision OCR
+│   ├── PlaylistParser.swift    // OCR テキスト解析
 │   └── AppleMusicService.swift // MusicKit ラッパー
 ├── UseCases/
-│   └── ConversionUseCase.swift // 変換ロジック統合
+│   └── ConversionUseCase.swift
 └── Models/
-    ├── SpotifyPlaylist.swift
-    ├── SpotifyTrack.swift
+    ├── RecognizedTrack.swift
     └── ConversionResult.swift
 ```
 
@@ -276,11 +253,10 @@ Twist/
 
 | フェーズ | 内容 |
 |---|---|
-| **Phase 1** | Spotify Web API 連携・曲情報取得 |
+| **Phase 1** | OCR・PlaylistParser 実装 |
 | **Phase 2** | MusicKit 認証・プレイリスト作成 |
-| **Phase 3** | ディープリンク対応（カスタム URL スキーム） |
-| **Phase 4** | HomeView の URL 入力フォーム実装 |
-| **Phase 5** | ResultView・スキップ曲通知の実装 |
-| **Phase 6** | 広告エリアの実装（AdMob 等） |
-| **Phase 7** | Universal Links への移行・iPad 対応 |
+| **Phase 3** | HomeView 画像ピッカー実装 |
+| **Phase 4** | ResultView・スキップ曲通知の実装 |
+| **Phase 5** | 広告エリアの実装（AdMob 等） |
+| **Phase 6** | iPad 対応 |
 

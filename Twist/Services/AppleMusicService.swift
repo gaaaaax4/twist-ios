@@ -17,10 +17,10 @@ final class AppleMusicService {
     ///   1. "{title} {artist}"
     ///   2. "{title} {album}"
     /// Returns nil if nothing matches (caller should skip the track).
-    func findSong(for track: SpotifyTrack) async throws -> Song? {
+    func findSong(for track: RecognizedTrack) async throws -> Song? {
         let queries = [
-            "\(track.name) \(track.artistName)",
-            "\(track.name) \(track.album.name)"
+            "\(track.name) \(track.artist)",
+            track.name
         ]
         for query in queries {
             var req = MusicCatalogSearchRequest(term: query, types: [Song.self])
@@ -37,15 +37,15 @@ final class AppleMusicService {
                 throw AppError.appleMusicNetwork
             }
         }
-        print("[AppleMusic]   ⚠️ no match for: \(track.name) – \(track.artistName)")
+        print("[AppleMusic]   ⚠️ no match for: \(track.name) – \(track.artist)")
         return nil
     }
 
     // MARK: - Playlist Creation
 
-    func createPlaylist(name: String, ownerName: String, songs: [Song]) async throws {
+    func createPlaylist(name: String, songs: [Song]) async throws {
         let finalName   = try await resolvedPlaylistName(base: name)
-        let description = "Created by \(ownerName) via Twist"
+        let description = "Created by Twist"
         do {
             _ = try await MusicLibrary.shared.createPlaylist(
                 name: finalName,
@@ -61,7 +61,7 @@ final class AppleMusicService {
 
     /// Returns `base` if no duplicate exists, otherwise `base_2`, `base_3`, …
     private func resolvedPlaylistName(base: String) async throws -> String {
-        var req = MusicLibraryRequest<Playlist>()
+        let req = MusicLibraryRequest<Playlist>()
         let res: MusicLibraryResponse<Playlist>
         do {
             res = try await req.response()

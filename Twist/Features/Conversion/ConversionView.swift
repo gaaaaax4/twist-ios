@@ -2,9 +2,11 @@ import SwiftUI
 
 @available(iOS 16.0, *)
 struct ConversionView: View {
-    let urlString: String
+    let image:        UIImage
+    let playlistName: String
 
     @StateObject private var viewModel = ConversionViewModel()
+    @EnvironmentObject private var navigationState: NavigationState
     @State private var navigateToResult = false
     @State private var result: ConversionResult?
 
@@ -23,17 +25,13 @@ struct ConversionView: View {
                 errorView(err)
             }
         }
-        .navigationTitle("Converting")
+        .navigationTitle("")
         .navigationBarBackButtonHidden(true)
         .swipeBackEnabled()
-        .task { await viewModel.start(urlString: urlString) }
-        // Navigate to ResultView when done
-        .background(
-            NavigationLink(
-                destination: ResultView(result: result ?? .empty),
-                isActive: $navigateToResult
-            ) { EmptyView() }
-        )
+        .task { await viewModel.start(image: image, playlistName: playlistName) }
+        .navigationDestination(isPresented: $navigateToResult) {
+            ResultView(result: result ?? .empty)
+        }
     }
 
     // MARK: - Converting View
@@ -60,16 +58,10 @@ struct ConversionView: View {
 
             Spacer()
 
-            // Ad area — reserved for Phase 6 (AdMob)
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.systemGray6))
+            // Banner Ad
+            BannerAdView()
                 .frame(height: 60)
-                .overlay(
-                    Text("Ad")
-                        .font(.caption)
-                        .foregroundStyle(Color(.systemGray3))
-                )
-                .padding(.horizontal)
+                .padding(.horizontal, 16)
                 .padding(.bottom)
         }
     }
@@ -77,24 +69,27 @@ struct ConversionView: View {
     // MARK: - Error View
 
     private func errorView(_ error: AppError) -> some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
+            Spacer()
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 56))
                 .foregroundStyle(.red)
             Text(error.errorDescription ?? "Something went wrong.")
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+            Spacer()
+            Button {
+                navigationState.popToRoot()
+            } label: {
+                Label("Home", systemImage: "house")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
         }
     }
-}
-
-// MARK: - Empty placeholder
-
-private extension ConversionResult {
-    static let empty = ConversionResult(
-        playlistName: "",
-        totalTracks: 0,
-        matchedCount: 0,
-        skippedTracks: []
-    )
 }

@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 @available(iOS 16.0, *)
 @MainActor
@@ -16,7 +17,7 @@ final class ConversionViewModel: ObservableObject {
 
     private let useCase = ConversionUseCase()
 
-    func start(urlString: String) async {
+    func start(image: UIImage, playlistName: String) async {
         state = .converting
 
         useCase.onProgress = { [weak self] completed, total in
@@ -27,14 +28,14 @@ final class ConversionViewModel: ObservableObject {
         }
 
         do {
-            let result = try await useCase.convert(urlString: urlString)
+            let result = try await useCase.convert(image: image, playlistName: playlistName)
             state = .done(result)
         } catch let err as AppError {
             print("[ConversionViewModel] ❌ AppError: \(err.errorCode) — \(err)")
             state = .failed(err)
         } catch {
             print("[ConversionViewModel] ❌ unknown error: \(error)")
-            state = .failed(.spotifyNetwork)
+            state = .failed(.ocrFailed)
         }
     }
 }

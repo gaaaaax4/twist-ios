@@ -1,34 +1,30 @@
 import Foundation
 
 enum AppError: LocalizedError {
-    case invalidURL
-    case spotifyAuth
-    case spotifyForbidden
-    case spotifyNotFound
-    case spotifyRateLimit
-    case spotifyNetwork
+    case ocrFailed
+    case noTracksRecognized
     case appleMusicAuth
     case appleMusicCreate
     case appleMusicNetwork
 
     var errorCode: String {
         switch self {
-        case .invalidURL:        return "ERR_INVALID_URL"
-        case .spotifyAuth:       return "ERR_SPOTIFY_401"
-        case .spotifyForbidden:  return "ERR_SPOTIFY_403"
-        case .spotifyNotFound:   return "ERR_SPOTIFY_404"
-        case .spotifyRateLimit:  return "ERR_SPOTIFY_429"
-        case .spotifyNetwork:    return "ERR_SPOTIFY_NET"
-        case .appleMusicAuth:    return "ERR_MUSIC_AUTH"
-        case .appleMusicCreate:  return "ERR_MUSIC_CREATE"
-        case .appleMusicNetwork: return "ERR_MUSIC_NET"
+        case .ocrFailed:           return "ERR_OCR_FAILED"
+        case .noTracksRecognized:  return "ERR_NO_TRACKS"
+        case .appleMusicAuth:      return "ERR_MUSIC_AUTH"
+        case .appleMusicCreate:    return "ERR_MUSIC_CREATE"
+        case .appleMusicNetwork:   return "ERR_MUSIC_NET"
         }
     }
 
     var errorDescription: String? {
         switch self {
-        case .spotifyForbidden:
-            return "This playlist could not be accessed. The Spotify API requires the app developer to have an active Spotify Premium subscription. (ERR_SPOTIFY_403)"
+        case .ocrFailed:
+            return "Could not read text from the image. Please try a clearer screenshot. (ERR_OCR_FAILED)"
+        case .noTracksRecognized:
+            return "No tracks were recognized in the screenshot. Make sure it shows a Spotify playlist in list view. (ERR_NO_TRACKS)"
+        case .appleMusicAuth:
+            return "Apple Music access was denied. Please allow access in Settings. (ERR_MUSIC_AUTH)"
         default:
             return "Something went wrong. (\(errorCode))"
         }
