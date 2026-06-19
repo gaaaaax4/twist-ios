@@ -6,6 +6,11 @@ struct TwistApp: App {
     @StateObject private var navigationState = NavigationState()
 
     init() {
+        let requestConfig = GADMobileAds.sharedInstance().requestConfiguration
+        requestConfig.tagForChildDirectedTreatment = true
+        requestConfig.tagForUnderAgeOfConsent = true
+        requestConfig.maxAdContentRating = GADMaxAdContentRating.general
+
         // AdMob SDK must be initialized before any ad is loaded
         GADMobileAds.sharedInstance().start()
     }
