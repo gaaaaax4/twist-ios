@@ -2,10 +2,14 @@
 
 Thank you for using Twist.
 
+Official support page for App Store submission:
+- https://github.com/gaaaaax4/twist-ios/blob/main/docs/support.md
+
 If you need help, please use one of the following methods:
 
 ## Contact / Feedback
 - Open an issue on GitHub: https://github.com/gaaaaax4/twist-ios/issues
+- Privacy policy: https://github.com/gaaaaax4/twist-ios/blob/main/docs/privacy-policy.md
 
 ## Typical Support Topics
 - OCR does not recognize tracks correctly
@@ -25,4 +29,4 @@ Please include:
 For privacy details, see the app's privacy policy and in-app disclosures.
 
 ---
-Last updated: 2026-06-17
+Last updated: 2026-06-19
