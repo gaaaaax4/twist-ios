@@ -2,6 +2,6 @@ title: Twist Support
 description: Support and privacy information for Twist.
 theme: minima
 header_pages:
-	- privacy-policy.md
+  - privacy-policy.md
 exclude:
-	- app-review-resubmission.md
+  - app-review-resubmission.md
