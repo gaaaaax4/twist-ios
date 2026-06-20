@@ -11,7 +11,7 @@ Rejection items:
 Set Support URL to a functional, public GitHub Pages support page. Do not use the repository top page or GitHub blob page as the Support URL.
 
 Recommended URL:
-- https://gaaaaax4.github.io/twist-ios/support/
+- https://gaaaaax4.github.io/twist-ios/
 
 Before resubmitting, open the URL in a private/incognito browser window and confirm it shows the Twist Support page without requiring a GitHub login.
 
@@ -21,7 +21,7 @@ GitHub Pages setup:
 3. Set Source to "Deploy from a branch".
 4. Set Branch to "main" and Folder to "/docs".
 5. Save and wait for the deployment to complete.
-6. Open https://gaaaaax4.github.io/twist-ios/support/ in a private/incognito browser window.
+6. Open https://gaaaaax4.github.io/twist-ios/ in a private/incognito browser window.
 
 If the URL returns 404, check these first:
 - the Pages changes have been pushed to GitHub
@@ -83,7 +83,7 @@ We have addressed both issues:
 
 1. Support URL updated
 - We updated the Support URL to a functional support page:
-https://gaaaaax4.github.io/twist-ios/support/
+https://gaaaaax4.github.io/twist-ios/
 
 2. Demo video provided
 - We provided a new demo video recorded on a physical iOS device using version 1.0 (1).
@@ -106,7 +106,7 @@ App Review Team
 
 1. Support URLの更新
 - 有効なサポートページに更新しました。
-https://gaaaaax4.github.io/twist-ios/support/
+https://gaaaaax4.github.io/twist-ios/
 
 2. デモ動画の提出
 - バージョン1.0 (1)を実機iOSデバイスで撮影したデモ動画を用意しました。

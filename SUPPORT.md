@@ -3,7 +3,7 @@
 Thank you for using Twist.
 
 Official support page for App Store submission:
-- https://gaaaaax4.github.io/twist-ios/support/
+- https://gaaaaax4.github.io/twist-ios/
 
 If you need help, please use one of the following methods:
 
