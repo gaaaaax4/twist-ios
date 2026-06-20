@@ -1,3 +1,8 @@
+---
+title: Twist Support
+permalink: /support/
+---
+
 # Twist Support
 
 **Last updated:** 2026-06-19
@@ -44,7 +49,7 @@ Twist converts track lists from Spotify playlist screenshots into a new Apple Mu
 
 ## Privacy
 
-- Privacy Policy: https://github.com/gaaaaax4/twist-ios/blob/main/docs/privacy-policy.md
+- Privacy Policy: https://gaaaaax4.github.io/twist-ios/privacy-policy/
 
 Twist processes OCR on-device and does not operate backend servers for user data.
 

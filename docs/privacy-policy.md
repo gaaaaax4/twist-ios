@@ -1,3 +1,8 @@
+---
+title: Privacy Policy for Twist
+permalink: /privacy-policy/
+---
+
 # Privacy Policy for Twist
 
 **Effective Date:** 2026-06-19

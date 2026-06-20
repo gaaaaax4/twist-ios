@@ -3,13 +3,13 @@
 Thank you for using Twist.
 
 Official support page for App Store submission:
-- https://github.com/gaaaaax4/twist-ios/blob/main/docs/support.md
+- https://gaaaaax4.github.io/twist-ios/support/
 
 If you need help, please use one of the following methods:
 
 ## Contact / Feedback
 - Open an issue on GitHub: https://github.com/gaaaaax4/twist-ios/issues
-- Privacy policy: https://github.com/gaaaaax4/twist-ios/blob/main/docs/privacy-policy.md
+- Privacy policy: https://gaaaaax4.github.io/twist-ios/privacy-policy/
 
 ## Typical Support Topics
 - OCR does not recognize tracks correctly
