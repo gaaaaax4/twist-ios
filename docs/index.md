@@ -11,8 +11,8 @@ Twist converts track lists from Spotify playlist screenshots into a new Apple Mu
 
 ## Contact
 
-- Support issues: https://github.com/gaaaaax4/twist-ios/issues
-- Privacy Policy: /twist-ios/privacy-policy/
+- Support issues: [https://github.com/gaaaaax4/twist-ios/issues](https://github.com/gaaaaax4/twist-ios/issues)
+- Privacy Policy: [https://gaaaaax4.github.io/twist-ios/privacy-policy/](https://gaaaaax4.github.io/twist-ios/privacy-policy/)
 
 When contacting support, please include:
 
