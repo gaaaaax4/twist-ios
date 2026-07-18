@@ -8,7 +8,8 @@ Official support page for App Store submission:
 If you need help, please use one of the following methods:
 
 ## Contact / Feedback
-- Open an issue on GitHub: https://github.com/gaaaaax4/twist-ios/issues
+- Request support or ask a question: https://github.com/gaaaaax4/twist-ios/issues/new
+- View existing support issues: https://github.com/gaaaaax4/twist-ios/issues
 - Privacy policy: https://gaaaaax4.github.io/twist-ios/privacy-policy/
 
 ## Typical Support Topics
@@ -29,4 +30,4 @@ Please include:
 For privacy details, see the app's privacy policy and in-app disclosures.
 
 ---
-Last updated: 2026-06-19
+Last updated: 2026-07-18

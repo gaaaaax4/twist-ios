@@ -1,10 +1,10 @@
 # App Review Resubmission Notes
 
-Use this checklist and reply text for the June 2026 rejection items.
+Use this checklist and reply text for the July 2026 rejection items.
 
 Rejection items:
 - Guideline 1.5: Support URL in App Store Connect was not accepted.
-- Guideline 2.1: App Review needs a demo video recorded on a physical iOS device.
+- Guideline 2.1: App Review needs a demo video recorded on a physical iOS device for version 1.0 (1).
 
 ## 1) Fix Support URL in App Store Connect
 
@@ -13,7 +13,7 @@ Set Support URL to a functional, public GitHub Pages support page. Do not use th
 Recommended URL:
 - https://gaaaaax4.github.io/twist-ios/
 
-Before resubmitting, open the URL in a private/incognito browser window and confirm it shows the Twist Support page without requiring a GitHub login.
+Before resubmitting, open the URL in a private/incognito browser window and confirm it shows the Twist Support page without requiring a GitHub login. The page should clearly say users can ask questions, report problems, and request support.
 
 GitHub Pages setup:
 1. Commit and push the Pages files to the `main` branch.
@@ -43,6 +43,7 @@ Video requirements from App Review:
 - Shows all core app features
 - Shows permission prompts and flows
 - Uses the current submitted version, 1.0 (1)
+- Matches the build currently submitted for review
 
 Recommended hosting:
 - Unlisted YouTube video
@@ -53,7 +54,7 @@ Before resubmitting, test the video link in a private/incognito browser window.
 
 ## 3) Demo Video Recording Script (Suggested)
 
-Record on a physical iOS device. A physical iPad is ideal if available because App Review used an iPad Pro 11-inch (M4), but a physical iPhone is acceptable if that is the available review target.
+Record on a physical iOS device. App Review used an iPhone 17 Pro Max for this review, so use a physical iPhone if available. Do not use a simulator.
 
 Suggested flow:
 1. Show the physical device home screen and open Twist.
@@ -73,7 +74,20 @@ Suggested flow:
 
 If a permission was already granted on the device, reset it before recording or mention in Notes that the permission had already been granted on the recording device.
 
-## 4) Reply Message to Apple (English Template)
+## 4) App Review Information Notes Field Template
+
+Paste this in:
+- App Store Connect -> App Review Information -> Notes
+
+Demo video recorded on a physical iOS device for Twist version 1.0 (1):
+[PASTE_VIDEO_LINK_HERE]
+
+The video demonstrates the current app flow, including Photo Library access, Apple Music authorization, screenshot OCR, playlist creation, and confirmation of the created playlist in Apple Music.
+
+Support URL:
+https://gaaaaax4.github.io/twist-ios/
+
+## 5) Reply Message to Apple (English Template)
 
 Hello App Review Team,
 
@@ -82,7 +96,7 @@ Thank you for your review.
 We have addressed both issues:
 
 1. Support URL updated
-- We updated the Support URL to a functional support page:
+- We updated the Support URL to a functional support page where users can ask questions, report issues, and request support:
 https://gaaaaax4.github.io/twist-ios/
 
 2. Demo video provided
@@ -98,14 +112,14 @@ Please let us know if any additional information is required.
 Best regards,
 Twist Developer
 
-## 5) Reply Message to Apple (Japanese Template)
+## 6) Reply Message to Apple (Japanese Template)
 
 App Review Team
 
 レビューありがとうございます。ご指摘の2点を対応しました。
 
 1. Support URLの更新
-- 有効なサポートページに更新しました。
+- 質問、問題報告、サポート依頼ができる有効なサポートページに更新しました。
 https://gaaaaax4.github.io/twist-ios/
 
 2. デモ動画の提出
